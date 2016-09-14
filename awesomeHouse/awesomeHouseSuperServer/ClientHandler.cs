@@ -35,7 +35,11 @@ namespace awesomeHouseSuperServer
             this.writer = new StreamWriter(netStream);
             this.reader = new StreamReader(netStream);
 
-            receiveFromClient(reader.ReadLine());
+            //BinaryWriter bwriter = new BinaryWriter(netStream);
+            //BinaryReader breader = new BinaryReader(netStream);
+
+            //byte[] data = breader.ReadBytes(int.MaxValue);
+            //receiveFromClient(data);
 
             this.writer.Close();
             this.reader.Close();

@@ -12,9 +12,6 @@ namespace awesomeHouseSuperServer
 {
     public class Server
     {
-        // GLobal adgang til ChatService
-        private ChatService chatService = new ChatService("Socket chat-rum");
-
         public Server (string serverIp, int serverPort)
         {
             // Server startes med info sendt til Constructor :
@@ -35,7 +32,7 @@ namespace awesomeHouseSuperServer
 
                 // User has connected
                 Console.WriteLine("User has connected to server");
-                ClientHandler handler = new ClientHandler(clientSocket, chatService);
+                ClientHandler handler = new ClientHandler(clientSocket);
 
                 // Adding the new client as a Thread
                 Thread threadThis = new Thread(handler.RunThisClient);
