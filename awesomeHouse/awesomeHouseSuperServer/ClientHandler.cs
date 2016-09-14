@@ -20,13 +20,11 @@ namespace awesomeHouseSuperServer
         private NetworkStream netStream;
         private StreamWriter writer;
         private StreamReader reader;
-        private ChatService chatService;
 
         // Constructor der opretter Clienthandleren til Chatservicen
-        public ClientHandler(Socket clientSocket, ChatService chatService)
+        public ClientHandler(Socket clientSocket)
         {
             this.clientSocket = clientSocket;
-            this.chatService = chatService;
         }
 
         // Runs the threadded client when called
@@ -37,7 +35,7 @@ namespace awesomeHouseSuperServer
             this.writer = new StreamWriter(netStream);
             this.reader = new StreamReader(netStream);
 
-            doDialog();
+            receiveFromClient(reader.ReadLine());
 
             this.writer.Close();
             this.reader.Close();
@@ -52,117 +50,37 @@ namespace awesomeHouseSuperServer
             writer.Flush();
         }
 
-        private string receiveFromClient()
+        private void receiveFromClient(byte[] data)
         {
-            try
-            {
-                test();
-                return reader.ReadLine();
-            }
-            catch
-            {
-                return null;
-            }
             
-        }
-
-        public void test()
-        {
-            User user = new User("tobias", "123lololol");
-            byte[] data = Serialize(user);
-            User user2 = new User();
-            user2 = DeSerialize(data);
-            // PSEUDO PSEUDO KODE - Benny, lol.
-            //bool b = false;
-
-            //if (et eller andet == "jens")
-            //{
-            //    b = true;
-            //}
-            //else false;
-
-            //AssertIf(b)
-            //    user in = new(navn, passsord);
-            //user out = deserie(serialisering(in));
-            //asser - areequal(in.name == out.name);
-        }
-
-        public byte[] Serialize (User user)
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            MemoryStream ms = new MemoryStream();
-            bf.Serialize(ms, user);
-            return ms.ToArray();
-        }
-        public User DeSerialize(byte[] data)
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            MemoryStream ms = new MemoryStream();
-            ms.Write(data, 0, data.Length);
-            ms.Seek(0, SeekOrigin.Begin);
-            object o = (object)bf.Deserialize(ms);
-            return (User)o;
-        }
-
-
-        private void doDialog()
-        {
             try
             {
-                sendToClient("Server ready - write EXIT to exit the program");
-                chatService.BroardCastEvent += this.BroadcastAction;
-
-                while (executeCommand() == true)
+                RequestHandler requestHandler = new RequestHandler();
+                bool cmd = true;
+                object receivedObject = DTO.DeserializeObject.Deserialize(data);
+                string type = receivedObject.GetType().ToString();
+                while (cmd == true)
                 {
-
-                }                          
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                chatService.BroardCastEvent -= this.BroadcastAction;      
-            }
-        }
-
-        private bool executeCommand()  
-        {
-            string cmd = receiveFromClient();
-            bool run = true;
-            while (run)
-            {
-                switch (cmd.ToLower())
-                {
-                    case "create user":
-                        CreateUser();
-                        break;
-                    default:
-                        break;
+                    switch (type)
+                    {
+                        case "CreateUser":
+                            requestHandler.CreateUser(receivedObject);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
-            if (cmd == null)
+            catch
             {
-                return false;
-            }
-            //if (input.Trim().ToLower() == "exit")
-            //{
-            //    return false;
-            //}
-            
-            //chatService.BroadCastBesked(input);
 
-            return true;
+            }
+
         }
 
         public void BroadcastAction(string msg)
         {
             sendToClient("Broadcast:" + msg);
-        }
-        public List<User> CreateUser()
-        {
-            return new List<User>();
         }
     }
 }

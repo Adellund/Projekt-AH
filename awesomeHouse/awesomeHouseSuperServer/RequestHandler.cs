@@ -8,14 +8,10 @@ namespace awesomeHouseSuperServer
 {
     public class RequestHandler
     {
-        public string CreateUser (string username, string password)
+        public object CreateUser (object user)
         {
-            
-            User myUser = new User(username, password);
 
-            ListClass.userList.Add(myUser);
-
-            return "User Created";
+            return user;
         }
     }
 }
