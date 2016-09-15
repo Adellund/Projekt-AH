@@ -2,9 +2,9 @@
 using System.IO;
 using System.Net.Sockets;
 
-namespace awesomeHouseWPFClient
+namespace AuctionHouseClient
 {
-    public class ChatClient
+    class ServerHandler
     {
         StreamWriter writer;
         StreamReader reader;
@@ -13,8 +13,9 @@ namespace awesomeHouseWPFClient
         string serverName;
         int port;
         bool connected;
+        decimal currentBid;
 
-        public ChatClient(string serverName, int port)
+        public ServerHandler(string serverName, int port)
         {
             this.serverName = serverName;
             this.port = port;
@@ -84,7 +85,7 @@ namespace awesomeHouseWPFClient
             writer.Flush();
         }
 
-        public bool CheckValidInput(string message)
+        public bool CheckBid(string message)
         {
             decimal bid;
             if (decimal.TryParse(message, out bid))
