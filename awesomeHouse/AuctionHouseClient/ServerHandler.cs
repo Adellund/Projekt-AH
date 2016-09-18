@@ -14,6 +14,7 @@ namespace AuctionHouseClient
         int port;
         bool connected;
         decimal currentBid;
+        string username;
 
         public ServerHandler(string serverName, int port)
         {
@@ -32,6 +33,10 @@ namespace AuctionHouseClient
                 reader = new StreamReader(networkStream);
                 writer = new StreamWriter(networkStream);
 
+                this.username = username;
+                writer.Write("login;{0};{1};{2}", username, password, confirmPassword);
+                writer.Flush();
+
                 return "Successfully connected to IP: " + serverName;
             }
             catch (SocketException se)
@@ -44,6 +49,7 @@ namespace AuctionHouseClient
         {
             try
             {
+                writer.Write("disconnect;{0}", username);
                 connected = false;
                 writer.Close();
                 reader.Close();
@@ -60,7 +66,7 @@ namespace AuctionHouseClient
             }
         }
 
-        public string RecieveMessageFromServer()
+        public string ReceiveMessageFromServer()
         {
             while (connected)
             {
@@ -68,7 +74,15 @@ namespace AuctionHouseClient
                 {
                     string serverMessage = reader.ReadLine();
                     if (serverMessage != null)
+                    {
+                        string[] message = serverMessage.Split(';');
+                        if (message[0].ToLower() == "bid")
+                        {
+                            currentBid = decimal.Parse(message[1]);
+                            return "New highest bid from user " + message[2] + ": " + message[1];
+                        }
                         return serverMessage;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -79,9 +93,9 @@ namespace AuctionHouseClient
             return "Thread has been terminated.";
         }
 
-        public void SendMessageToServer(string message)
+        public void SendBidToServer(string bid)
         {
-            writer.WriteLine(message);
+            writer.WriteLine("bid;{0};{1}", bid, username);
             writer.Flush();
         }
 

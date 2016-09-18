@@ -16,25 +16,27 @@ namespace AuctionHouseServer
         public event BroadCastEventHandler BroadCastEvent;
 
         TcpListener tcp;
-        Timer gavel;
+        Timer timer;
         public Auctioneer(string serverIp, int serverPort)
         {
             tcp = new TcpListener(IPAddress.Parse(serverIp), serverPort);
             tcp.Start();
-            gavel = new Timer(10, 5, 3);
+            timer = new Timer(10, 5, 3);
         }
 
         private void Run()
         {
-            // Make thread for ListenForClients
-            ListenForClients();
+            // Thread for listening for clients
+            Thread listenForClientsThread = new Thread(ListenForClients);
+            listenForClientsThread.Start();
+
             StartAuction();
             BroadcastStatus();
         }
 
         private void StartAuction()
         {
-            gavel.Start();
+            timer.Start();
         }
 
         private void ListenForClients()
