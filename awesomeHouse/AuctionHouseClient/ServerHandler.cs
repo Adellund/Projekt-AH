@@ -22,7 +22,7 @@ namespace AuctionHouseClient
             this.port = port;
         }
 
-        public string ConnectToServer(string username, string password, string confirmPassword)
+        public string ConnectToServer(string username)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace AuctionHouseClient
                 writer = new StreamWriter(networkStream);
 
                 this.username = username;
-                writer.Write("login;{0};{1};{2}", username, password, confirmPassword);
+                writer.Write("login;{0}", username);
                 writer.Flush();
 
                 return "Successfully connected to IP: " + serverName;

@@ -26,7 +26,10 @@ namespace AuctionHouseClient
             int port = int.Parse(Console.ReadLine());
 
             handler = new ServerHandler(ip, port);
-            string connect = handler.ConnectToServer("Andreas", "hej123", "hej123");
+
+            Console.WriteLine("Write Username:");
+            string username = Console.ReadLine();
+            string connect = handler.ConnectToServer(username);
             Console.WriteLine(connect);
 
             // Checks if connected properly
@@ -44,14 +47,12 @@ namespace AuctionHouseClient
             while (connected)
             {
                 string bid = Console.ReadLine();
-                if (bid.ToLower() == "exit")
-                    Console.WriteLine(handler.Disconnect());
 
                 // Checks if input is in proper bid form
                 if (handler.CheckBid(bid))
                     handler.SendBidToServer(bid);
                 else
-                    Console.WriteLine("Wrong input");
+                    Console.WriteLine("Invalid input");
             }
         }
 

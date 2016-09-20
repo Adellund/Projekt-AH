@@ -14,10 +14,13 @@ namespace AuctionHouseServer
         private NetworkStream netStream;
         private StreamWriter writer;
         private StreamReader reader;
+        private Auctioneer auctioneer;
+        public string username;
 
-        public ClientHandler(Socket clientSocket)
+        public ClientHandler(Socket clientSocket, Auctioneer auctioneer)
         {
             this.clientSocket = clientSocket;
+            this.auctioneer = auctioneer;
         }
 
         public void RunThisClient()
@@ -26,7 +29,7 @@ namespace AuctionHouseServer
             this.writer = new StreamWriter(netStream);
             this.reader = new StreamReader(netStream);
 
-            DoDialog();
+            ReceiveFromClient();
 
             this.reader.Close();
             this.netStream.Close();
@@ -34,15 +37,71 @@ namespace AuctionHouseServer
             this.clientSocket.Close();
         }
 
-        private void DoDialog()
+        private void ReceiveFromClient()
         {
-            writer.WriteLine();
+            auctioneer.BroadCastEvent += this.BroadcastAction;
+
+            while (true)
+            {
+                try
+                {
+                    string[] message = reader.ReadLine().Split(';');
+                    switch (message[0])
+                    {
+                        case "login":
+                            Login(message[1]);
+                            break;
+                        case "bid":
+                            Bid(message[1]);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                
+            }
+        }
+
+        private void SendToClient(string msg)
+        {
+            writer.WriteLine(msg);
             writer.Flush();
         }
 
-        private void ReceiveFromServer()
+        private void Login(string username)
         {
+            this.username = username;
+            auctioneer.BroadcastMessage(username + " has joined the server");
+        }
 
+        private void Bid(string bid)
+        {
+            try
+            {
+                decimal userBid = decimal.Parse(bid);
+                if (userBid > auctioneer.currentBid)
+                {
+                    auctioneer.currentBid = decimal.Parse(bid);
+                    auctioneer.BroadcastMessage("bid;" + userBid + ";" + username);
+                }
+                else
+                {
+                    SendToClient("Bid is too low");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        private void BroadcastAction(string msg)
+        {
+            SendToClient(msg);
         }
     }
 }

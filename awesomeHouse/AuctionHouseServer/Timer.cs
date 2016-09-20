@@ -9,21 +9,24 @@ namespace AuctionHouseServer
 {
     class Timer
     {
+        Auctioneer auctioneer;
         // Indeholder alt timer-relateret
         public int counter = 0;
         static System.Timers.Timer aTimer = new System.Timers.Timer();
         private int once;
         private int second;
         private int third;
+        decimal lastBid;
 
-        public Timer(int once, int second, int third)
+        public Timer(Auctioneer auctioneer, int once, int second, int third)
         {
+            this.auctioneer = auctioneer;
+            lastBid = auctioneer.currentBid;
             this.once = once;
             this.second = second;
             this.third = third;
         }
 
-        // Fiks Console.WriteLine()s i class, så der kan blive foretaget ordentlige tests.
         public void Start()
         {
             // Timer information 
@@ -35,30 +38,35 @@ namespace AuctionHouseServer
 
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            counter--;
+            if (auctioneer.currentBid == lastBid)
+            {
+                counter++;
 
-            // Show or hide counter
-            Console.WriteLine(counter.ToString());
-
-            if (counter == once)
-            {
-                Console.WriteLine("Going Once");
+                if (counter == once)
+                {
+                    Console.WriteLine("Going Once");
+                }
+                else if (counter == second)
+                {
+                    Console.WriteLine("Going Twice");
+                }
+                else if (counter == third)
+                {
+                    aTimer.Stop();
+                    Console.WriteLine("Going Third");
+                    Console.WriteLine("Winner");
+                }
             }
-            else if (counter == second)
+            else
             {
-                Console.WriteLine("Going Twice");
-            }
-            else if (counter == third)
-            {
-                aTimer.Stop();
-                Console.WriteLine("Going Third");
-                Console.WriteLine("Winner");
+                ResetTimer();
+                lastBid = auctioneer.currentBid;
             }
         }
 
         public void ResetTimer()
         {
-
+            counter = 0;
         }
     }
 }

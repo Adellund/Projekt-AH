@@ -10,13 +10,11 @@ namespace AuctionHouseServer
     {
         string Name;
         decimal StartPrice;
-        DateTime StartDate;
 
-        public Item(string name, decimal startPrice, DateTime startDate)
+        public Item(string name, decimal startPrice)
         {
             this.Name = name;
             this.StartPrice = startPrice;
-            this.StartDate = startDate;
         }
     }
 }

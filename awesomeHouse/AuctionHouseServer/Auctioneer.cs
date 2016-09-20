@@ -10,10 +10,12 @@ using System.Threading;
 
 namespace AuctionHouseServer
 {
-    class Auctioneer
+    public class Auctioneer
     {
         public delegate void BroadCastEventHandler(string msg);
         public event BroadCastEventHandler BroadCastEvent;
+        public decimal currentBid;
+        List<Item> items;
 
         TcpListener tcp;
         Timer timer;
@@ -21,34 +23,43 @@ namespace AuctionHouseServer
         {
             tcp = new TcpListener(IPAddress.Parse(serverIp), serverPort);
             tcp.Start();
-            timer = new Timer(10, 5, 3);
+
+            Thread listenForClientsThread = new Thread(ListenForClients);
+            listenForClientsThread.Start();
+
+            Run();
         }
 
         private void Run()
         {
-            // Thread for listening for clients
-            Thread listenForClientsThread = new Thread(ListenForClients);
-            listenForClientsThread.Start();
-
             StartAuction();
-            BroadcastStatus();
         }
 
         private void StartAuction()
         {
-            timer.Start();
+            items = new List<Item> {
+                new Item("Kød", 20),
+                new Item("Kim", 5),
+                new Item("Pølser", 10)};
+
+            foreach (Item item in items)
+            {
+                timer = new Timer(this, 10, 15, 18);
+                timer.Start();
+            }
         }
 
         private void ListenForClients()
         {
             while (true)
             {
+                Console.WriteLine("listening");
                 // listening to TCP on above set ip/port
                 Socket clientSocket = tcp.AcceptSocket();
 
                 // User has connected
                 Console.WriteLine("User has connected to server");
-                ClientHandler handler = new ClientHandler(clientSocket);
+                ClientHandler handler = new ClientHandler(clientSocket, this);
 
                 // Adding the new client as a Thread
                 Thread threadThis = new Thread(handler.RunThisClient);
@@ -56,15 +67,11 @@ namespace AuctionHouseServer
             }
         }
 
-
-        private void BroadcastStatus()
-        {
-
-        }
-
         public void BroadcastMessage(string msg)
         {
-            //sendToClient("Broadcast:" + msg);
+            if (this.BroadCastEvent != null)
+                BroadCastEvent(msg);
         }
+
     }
 }
