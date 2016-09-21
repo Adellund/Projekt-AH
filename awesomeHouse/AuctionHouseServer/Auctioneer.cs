@@ -15,7 +15,9 @@ namespace AuctionHouseServer
         public delegate void BroadCastEventHandler(string msg);
         public event BroadCastEventHandler BroadCastEvent;
         public decimal currentBid;
+        public string currentUser;
         List<Item> items;
+        List<ClientHandler> clients;
 
         TcpListener tcp;
         Timer timer;
@@ -23,6 +25,7 @@ namespace AuctionHouseServer
         {
             tcp = new TcpListener(IPAddress.Parse(serverIp), serverPort);
             tcp.Start();
+            clients = new List<ClientHandler>();
 
             Thread listenForClientsThread = new Thread(ListenForClients);
             listenForClientsThread.Start();
@@ -44,8 +47,10 @@ namespace AuctionHouseServer
 
             foreach (Item item in items)
             {
-                timer = new Timer(this, 10, 15, 18);
+                timer = new Timer(item, this, 10, 15, 18);
                 timer.Start();
+                timer.WaitForTimer();
+                
             }
         }
 
@@ -53,13 +58,14 @@ namespace AuctionHouseServer
         {
             while (true)
             {
-                Console.WriteLine("listening");
+                Console.WriteLine("Listening for a connection...");
                 // listening to TCP on above set ip/port
                 Socket clientSocket = tcp.AcceptSocket();
 
                 // User has connected
                 Console.WriteLine("User has connected to server");
                 ClientHandler handler = new ClientHandler(clientSocket, this);
+                clients.Add(handler);
 
                 // Adding the new client as a Thread
                 Thread threadThis = new Thread(handler.RunThisClient);
@@ -73,5 +79,18 @@ namespace AuctionHouseServer
                 BroadCastEvent(msg);
         }
 
+        public void BroadcastToAllClients(string msg)
+        {
+            foreach (ClientHandler client in clients)
+                client.SendToClient(msg);
+        }
+
+        public void EndAuction()
+        {
+            if (currentUser == null)
+                BroadcastToAllClients("Nobody won!");
+            else
+                BroadcastToAllClients("Winner is " + currentUser);
+        }
     }
 }

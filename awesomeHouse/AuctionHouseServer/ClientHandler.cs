@@ -16,6 +16,7 @@ namespace AuctionHouseServer
         private StreamReader reader;
         private Auctioneer auctioneer;
         public string username;
+        bool connected;
 
         public ClientHandler(Socket clientSocket, Auctioneer auctioneer)
         {
@@ -28,6 +29,7 @@ namespace AuctionHouseServer
             this.netStream = new NetworkStream(clientSocket);
             this.writer = new StreamWriter(netStream);
             this.reader = new StreamReader(netStream);
+            connected = true;
 
             ReceiveFromClient();
 
@@ -41,7 +43,7 @@ namespace AuctionHouseServer
         {
             auctioneer.BroadCastEvent += this.BroadcastAction;
 
-            while (true)
+            while (connected)
             {
                 try
                 {
@@ -58,15 +60,16 @@ namespace AuctionHouseServer
                             break;
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine(username + " has disconnected.");
+                    connected = false;
                 }
                 
             }
         }
 
-        private void SendToClient(string msg)
+        public void SendToClient(string msg)
         {
             writer.WriteLine(msg);
             writer.Flush();
@@ -75,6 +78,7 @@ namespace AuctionHouseServer
         private void Login(string username)
         {
             this.username = username;
+            Console.WriteLine(username + " has joined the server");
             auctioneer.BroadcastMessage(username + " has joined the server");
         }
 
@@ -86,6 +90,7 @@ namespace AuctionHouseServer
                 if (userBid > auctioneer.currentBid)
                 {
                     auctioneer.currentBid = decimal.Parse(bid);
+                    auctioneer.currentUser = username;
                     auctioneer.BroadcastMessage("bid;" + userBid + ";" + username);
                 }
                 else

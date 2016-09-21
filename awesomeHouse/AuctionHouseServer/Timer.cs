@@ -4,23 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Timers;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace AuctionHouseServer
 {
     class Timer
     {
+        Item currentItem;
         Auctioneer auctioneer;
         // Indeholder alt timer-relateret
         public int counter = 0;
-        static System.Timers.Timer aTimer = new System.Timers.Timer();
+        static System.Timers.Timer aTimer;
         private int once;
         private int second;
         private int third;
         decimal lastBid;
 
-        public Timer(Auctioneer auctioneer, int once, int second, int third)
+        public Timer(Item item, Auctioneer auctioneer, int once, int second, int third)
         {
+            aTimer = new System.Timers.Timer();
+            currentItem = item;
             this.auctioneer = auctioneer;
+            auctioneer.currentBid = item.StartPrice;
             lastBid = auctioneer.currentBid;
             this.once = once;
             this.second = second;
@@ -30,10 +35,11 @@ namespace AuctionHouseServer
         public void Start()
         {
             // Timer information 
+            Thread.Sleep(10000);
+            auctioneer.BroadcastToAllClients("Starting auction on item: " + currentItem.Name + " with start price: " + currentItem.StartPrice);
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             aTimer.Interval = 1000;
             aTimer.Start();
-            Console.WriteLine(counter.ToString());
         }
 
         private void OnTimedEvent(object source, ElapsedEventArgs e)
@@ -44,17 +50,20 @@ namespace AuctionHouseServer
 
                 if (counter == once)
                 {
-                    Console.WriteLine("Going Once");
+                    auctioneer.BroadcastToAllClients("Going Once");
                 }
                 else if (counter == second)
                 {
-                    Console.WriteLine("Going Twice");
+                    auctioneer.BroadcastToAllClients("Going Twice");
                 }
                 else if (counter == third)
                 {
+                    auctioneer.BroadcastToAllClients("Going Third");
+                    auctioneer.EndAuction();
+                    aTimer.Enabled = false;
                     aTimer.Stop();
-                    Console.WriteLine("Going Third");
-                    Console.WriteLine("Winner");
+                    aTimer.Dispose();
+
                 }
             }
             else
@@ -67,6 +76,14 @@ namespace AuctionHouseServer
         public void ResetTimer()
         {
             counter = 0;
+        }
+
+        public void WaitForTimer()
+        {
+            while (aTimer.Enabled)
+            {
+                Thread.Sleep(1000);
+            }
         }
     }
 }

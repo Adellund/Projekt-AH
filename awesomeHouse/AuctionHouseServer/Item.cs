@@ -8,13 +8,28 @@ namespace AuctionHouseServer
 {
     class Item
     {
-        string Name;
-        decimal StartPrice;
+        string name;
+        decimal startPrice;
 
         public Item(string name, decimal startPrice)
         {
-            this.Name = name;
-            this.StartPrice = startPrice;
+            this.name = name;
+            this.startPrice = startPrice;
+        }
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+
+        public decimal StartPrice
+        {
+            get
+            {
+                return startPrice;
+            }
         }
     }
 }
