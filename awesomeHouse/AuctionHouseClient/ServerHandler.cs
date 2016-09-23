@@ -33,9 +33,9 @@ namespace AuctionHouseClient
                 reader = new StreamReader(networkStream);
                 writer = new StreamWriter(networkStream);
 
+
                 this.username = username;
-                writer.Write("login;{0}", username);
-                writer.Flush();
+                SendLoginToServer(username);
 
                 return "Successfully connected to IP: " + serverName;
             }
@@ -73,10 +73,10 @@ namespace AuctionHouseClient
                 try
                 {
                     string[] serverMessage = reader.ReadLine().Split(';');
-                    switch (serverMessage[1])
+                    switch (serverMessage[0])
                     {
                         case "bid":
-                            ReceiveBid(serverMessage[1]);
+                            ReceiveBid(serverMessage[1], serverMessage[2]);
                             break;
                         case "message":
                             ReceiveMessage(serverMessage[1]);
@@ -94,10 +94,11 @@ namespace AuctionHouseClient
             return "Thread has been terminated.";
         }
 
-        private void ReceiveBid(string bidString)
+        private void ReceiveBid(string bidString, string username)
         {
             decimal bid = decimal.Parse(bidString);
             currentBid = bid;
+            Console.WriteLine("User {0} has bid {1}", username, bid);
         }
 
         private void ReceiveMessage(string message)
@@ -108,6 +109,12 @@ namespace AuctionHouseClient
         public void SendBidToServer(string bid)
         {
             writer.WriteLine("bid;{0};{1}", bid, username);
+            writer.Flush();
+        }
+
+        public void SendLoginToServer(string username)
+        {
+            writer.Write("login;{0};", username);
             writer.Flush();
         }
 

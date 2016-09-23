@@ -11,9 +11,7 @@ namespace AuctionHouseServer
     {
         static void Main(string[] args)
         {
-            //Auctioneer auctioneer = new Auctioneer("127.0.0.1", 666);
-
-            Auctioneer auctioneer = new Auctioneer("10.140.109.178", 666);
+            Auctioneer auctioneer = new Auctioneer("10.140.64.226", 12000);
         }
     }
 }

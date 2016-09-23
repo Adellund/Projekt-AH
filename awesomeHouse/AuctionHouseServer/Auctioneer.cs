@@ -41,9 +41,9 @@ namespace AuctionHouseServer
         private void StartAuction()
         {
             items = new List<Item> {
-                new Item("Kød", 20),
-                new Item("Kim", 5),
-                new Item("Pølser", 10)};
+                new Item("Stol", 20),
+                new Item("Bord", 25),
+                new Item("Lampe", 15)};
 
             foreach (Item item in items)
             {

@@ -54,7 +54,7 @@ namespace AuctionHouseServer
                             Login(message[1]);
                             break;
                         case "bid":
-                            Bid(message[1]);
+                            Bid(message[1], message[2]);
                             break;
                         default:
                             break;
@@ -78,23 +78,23 @@ namespace AuctionHouseServer
         {
             this.username = username;
             Console.WriteLine(username + " has joined the server");
-            auctioneer.BroadcastMessage("User" + username + " has joined the server", false);
+            auctioneer.BroadcastMessage("User " + username + " has joined the server", false);
         }
 
-        private void Bid(string bid)
+        private void Bid(string bid, string username)
         {
             try
             {
                 decimal userBid = decimal.Parse(bid);
                 if (userBid > auctioneer.currentBid)
                 {
-                    auctioneer.currentBid = decimal.Parse(bid);
+                    auctioneer.currentBid = userBid;
                     auctioneer.currentUser = username;
-                    auctioneer.BroadcastMessage("User " + username + " has bid " + userBid, true);
+                    auctioneer.BroadcastMessage(bid + ";" + username, true);
                 }
                 else
                 {
-                    SendToClient(userBid + " is too low, current price is " + auctioneer.currentBid);
+                    SendToClient("message;" + userBid + " is too low, current price is " + auctioneer.currentBid);
                 }
             }
             catch (Exception e)
@@ -109,6 +109,7 @@ namespace AuctionHouseServer
                 writer.WriteLine("bid;" + msg);
             if (!isBid)
                 writer.WriteLine("message;" + msg);
+            writer.Flush();
         }
     }
 }
