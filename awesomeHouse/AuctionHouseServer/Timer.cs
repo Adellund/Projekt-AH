@@ -36,7 +36,7 @@ namespace AuctionHouseServer
         {
             // Timer information 
             Thread.Sleep(10000);
-            auctioneer.BroadcastToAllClients("Starting auction on item: " + currentItem.Name + " with start price: " + currentItem.StartPrice);
+            auctioneer.BroadcastToAllClients("Starting auction on item: " + currentItem.Name + " with start price: " + currentItem.StartPrice, false);
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             aTimer.Interval = 1000;
             aTimer.Start();
@@ -50,15 +50,15 @@ namespace AuctionHouseServer
 
                 if (counter == once)
                 {
-                    auctioneer.BroadcastToAllClients("Going Once");
+                    auctioneer.BroadcastToAllClients("Going Once", false);
                 }
                 else if (counter == second)
                 {
-                    auctioneer.BroadcastToAllClients("Going Twice");
+                    auctioneer.BroadcastToAllClients("Going Twice", false);
                 }
                 else if (counter == third)
                 {
-                    auctioneer.BroadcastToAllClients("Going Third");
+                    auctioneer.BroadcastToAllClients("Going Third", false);
                     auctioneer.EndAuction();
                     aTimer.Enabled = false;
                     aTimer.Stop();

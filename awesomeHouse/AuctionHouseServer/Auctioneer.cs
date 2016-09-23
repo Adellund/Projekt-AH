@@ -12,7 +12,7 @@ namespace AuctionHouseServer
 {
     public class Auctioneer
     {
-        public delegate void BroadCastEventHandler(string msg);
+        public delegate void BroadCastEventHandler(string msg, bool isBid);
         public event BroadCastEventHandler BroadCastEvent;
         public decimal currentBid;
         public string currentUser;
@@ -73,24 +73,24 @@ namespace AuctionHouseServer
             }
         }
 
-        public void BroadcastMessage(string msg)
+        public void BroadcastMessage(string msg, bool isBid)
         {
             if (this.BroadCastEvent != null)
-                BroadCastEvent(msg);
+                BroadCastEvent(msg, isBid);
         }
 
-        public void BroadcastToAllClients(string msg)
+        public void BroadcastToAllClients(string msg, bool isBid)
         {
             foreach (ClientHandler client in clients)
-                client.SendToClient(msg);
+                client.BroadcastAction(msg, isBid);
         }
 
         public void EndAuction()
         {
             if (currentUser == null)
-                BroadcastToAllClients("Nobody won!");
+                BroadcastToAllClients("Nobody won!", false);
             else
-                BroadcastToAllClients("Winner is " + currentUser);
+                BroadcastToAllClients("Winner is " + currentUser, false);
         }
     }
 }

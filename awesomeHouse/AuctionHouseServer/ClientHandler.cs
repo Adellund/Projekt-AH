@@ -65,11 +65,10 @@ namespace AuctionHouseServer
                     Console.WriteLine(username + " has disconnected.");
                     connected = false;
                 }
-                
             }
         }
 
-        public void SendToClient(string msg)
+        private void SendToClient(string msg)
         {
             writer.WriteLine(msg);
             writer.Flush();
@@ -79,7 +78,7 @@ namespace AuctionHouseServer
         {
             this.username = username;
             Console.WriteLine(username + " has joined the server");
-            auctioneer.BroadcastMessage(username + " has joined the server");
+            auctioneer.BroadcastMessage("User" + username + " has joined the server", false);
         }
 
         private void Bid(string bid)
@@ -91,11 +90,11 @@ namespace AuctionHouseServer
                 {
                     auctioneer.currentBid = decimal.Parse(bid);
                     auctioneer.currentUser = username;
-                    auctioneer.BroadcastMessage("bid;" + userBid + ";" + username);
+                    auctioneer.BroadcastMessage("User " + username + " has bid " + userBid, true);
                 }
                 else
                 {
-                    SendToClient("Bid is too low");
+                    SendToClient(userBid + " is too low, current price is " + auctioneer.currentBid);
                 }
             }
             catch (Exception e)
@@ -104,9 +103,12 @@ namespace AuctionHouseServer
             }
         }
 
-        private void BroadcastAction(string msg)
+        public void BroadcastAction(string msg, bool isBid)
         {
-            SendToClient(msg);
+            if (isBid)
+                writer.WriteLine("bid;" + msg);
+            if (!isBid)
+                writer.WriteLine("message;" + msg);
         }
     }
 }

@@ -72,16 +72,17 @@ namespace AuctionHouseClient
             {
                 try
                 {
-                    string serverMessage = reader.ReadLine();
-                    if (serverMessage != null)
+                    string[] serverMessage = reader.ReadLine().Split(';');
+                    switch (serverMessage[1])
                     {
-                        string[] message = serverMessage.Split(';');
-                        if (message[0].ToLower() == "bid")
-                        {
-                            currentBid = decimal.Parse(message[1]);
-                            return "New highest bid from user " + message[2] + ": " + message[1];
-                        }
-                        return serverMessage;
+                        case "bid":
+                            ReceiveBid(serverMessage[1]);
+                            break;
+                        case "message":
+                            ReceiveMessage(serverMessage[1]);
+                            break;
+                        default:
+                            break;
                     }
                 }
                 catch (Exception e)
@@ -91,6 +92,17 @@ namespace AuctionHouseClient
 
             }
             return "Thread has been terminated.";
+        }
+
+        private void ReceiveBid(string bidString)
+        {
+            decimal bid = decimal.Parse(bidString);
+            currentBid = bid;
+        }
+
+        private void ReceiveMessage(string message)
+        {
+            Console.WriteLine(message);
         }
 
         public void SendBidToServer(string bid)
